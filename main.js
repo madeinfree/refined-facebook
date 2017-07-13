@@ -1,5 +1,6 @@
 (function(jq) {
   const fbMessageWrapperRight = jq('.fbDockWrapperRight'),
+        fbChatSidebar = jq('.fbChatSidebar'),
         leftCol = jq('#leftCol'), // 左側 panel
         rightCol = jq('#rightCol'), // 右側 panel
         pageLetBlueBar = jq('#pagelet_bluebar'), // 置頂選項
@@ -8,6 +9,8 @@
 
         contentCol = jq('#contentCol'), // 中間加右邊組合而成的區塊
         contentArea = jq('#contentArea'), // 中間塗鴉牆區整塊
+
+        topnewsMainStream = jq('#topnews_main_stream_408239535924329'), //文章區
 
         searchBarClickRef = jq('#searchBarClickRef') // 搜尋列
         w = jq(window)
@@ -21,6 +24,7 @@
 
   document.body.style.overflowX = 'hidden'
 
+  // Search-Bar
   let searchBarCloneContainer, inputtext
   if (searchBarClickRef.length) {
     searchBarCloneContainer = jq('<div></div>')
@@ -62,6 +66,56 @@
     inputtext[0].style.borderRadius = '5px'
     inputtext[0].style.fontSize = '30px'
   }
+
+  // 功能按鈕轉換
+  const keyFeaturesContainer = jq('<div id="key-features-container"></div>')
+  keyFeaturesContainer.css({
+    width: '100%',
+    justifyContent: 'center',
+    position: 'fixed',
+    display: 'flex',
+    top: '0'
+  })
+
+  // L
+  const keyLIntoButton = jq('<div id="key-l-into-button" class="btn btn-success">切換左側面板</div>')
+  keyLIntoButton.css({})
+  keyLIntoButton.on('click', runKeyL)
+
+  // R
+  const keyRIntoButton = jq('<div id="key-r-into-button" class="btn btn-success">切換右側面板</div>')
+  keyRIntoButton.css({})
+  keyRIntoButton.on('click', runKeyR)
+
+  // I
+  const keyIIntoButton = jq('<div id="key-i-into-button" class="btn btn-success">建立貼文面板縮放</div>')
+  keyIIntoButton.css({})
+  keyIIntoButton.on('click', runKeyI)
+
+  // C
+  const keyCIntoButton = jq('<div id="key-c-into-button" class="btn btn-success">隱藏聊天室</div>')
+  keyCIntoButton.css({})
+  keyCIntoButton.on('click', runKeyC)
+
+  keyFeaturesContainer.append(keyLIntoButton)
+                        .append(keyRIntoButton)
+                        .append(keyIIntoButton)
+                        .append(keyCIntoButton)
+
+  document.body.appendChild(keyFeaturesContainer[0])
+
+  // delegate 綁定所有 Click
+  const bindingCache = []
+  topnewsMainStream.on('click', function(ev) {
+    console.log(bindingCache)
+    if (ev.target.className === 'timestampContent' && bindingCache.indexOf(ev.target.parentNode.parentNode) < 0) {
+      ev.target.parentNode.parentNode.addEventListener('click', function(ev) {
+        console.log('run')
+        ev.preventDefault()
+      })
+      bindingCache.push(ev.target.parentNode.parentNode)
+    }
+  })
 
   // panel 滑動控制
   const keyL = 76,
@@ -146,6 +200,8 @@
       leftCol.fadeIn()
       contentCol.css('cssText', '')
       leftColIsRight = false
+      const nowScroll = window.scrollY
+      window.scrollTo(0, nowScroll + 10)
     }
   }
   function runKeyR() {
@@ -163,6 +219,8 @@
       contentArea.css('cssText', '')
       contentCol.css('cssText', '')
       rightColIsRight = false
+      const nowScroll = window.scrollY
+      window.scrollTo(0, nowScroll + 10)
     }
   }
   function runKeyT() {
@@ -180,11 +238,17 @@
   }
   function runKeyC() {
     if (!fbMessageIsHidden) {
+      fbChatSidebar.css({
+        display: 'none'
+      })
       fbMessageWrapperRight.css({
         display: 'none'
       })
       fbMessageIsHidden = true
     } else {
+      fbChatSidebar.css({
+        display: 'block'
+      })
       fbMessageWrapperRight.css({
         display: 'block'
       })
