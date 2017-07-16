@@ -117,6 +117,26 @@
     }
   })
 
+  // default setting
+  if (window.localStorage.getItem('facebook-refined-rightCol') === 'true') {
+    rightCol.fadeOut(function() {
+      //FIXME 修正右方區塊消失後，導致中間整體偏移至右邊
+      contentArea.css('cssText', 'width: 100% !important; left: 0px;')
+      if (leftColIsRight) {
+        contentCol.css('cssText', 'width: 100% !important; margin-left: 0px !important;')
+      }
+    })
+    rightColIsRight = true
+  }
+  if (window.localStorage.getItem('facebook-refined-leftCol') === 'true') {
+    leftCol.fadeOut(function() {
+      if (rightColIsRight) {
+        contentCol.css('cssText', 'width: 100% !important; margin-left: 0px !important;')
+      }
+    })
+    leftColIsRight = true
+  }
+
   // panel 滑動控制
   const keyL = 76,
         keyR = 82,
@@ -140,7 +160,9 @@
         runKeyL()
         break
       case keyR:
-        runKeyR()
+        if (!isCtrlOrCommandDown) {
+          runKeyR()
+        }
         break
       case keyT:
         runKeyT()
@@ -165,16 +187,13 @@
         break
       case keyCtrl:
       case keyCommand:
-        isCtrlOrCommandDown = true
+        runKeyCommandAndCtrl()
         break
       case keyEnter:
-        searchBarCloneContainer[0].style.display = 'none'
-        fbSearchIsHidden = true
+        runKeyEnter()
         break
       case keyEsc:
-        if (!fbSearchIsHidden) {
-          searchBarCloneContainer[0].style.display = 'none'
-        }
+        runKeyEsc()
         break
     }
   })
@@ -191,12 +210,14 @@
   function runKeyL() {
     if (!leftColIsRight) {
       leftCol.fadeOut(function() {
+        saveDefaultSetting({ name: '左邊欄', setting: { title: '隱藏' } })
         if (rightColIsRight) {
           contentCol.css('cssText', 'width: 100% !important; margin-left: 0px !important;')
         }
       })
       leftColIsRight = true
     } else {
+      saveDefaultSetting({ name: '左邊欄', setting: { title: '顯示' } })
       leftCol.fadeIn()
       contentCol.css('cssText', '')
       leftColIsRight = false
@@ -207,6 +228,7 @@
   function runKeyR() {
     if (!rightColIsRight) {
       rightCol.fadeOut(function() {
+        saveDefaultSetting({ name: '右邊欄', setting: { title: '隱藏' } })
         //FIXME 修正右方區塊消失後，導致中間整體偏移至右邊
         contentArea.css('cssText', 'width: 100% !important; left: 0px;')
         if (leftColIsRight) {
@@ -215,6 +237,7 @@
       })
       rightColIsRight = true
     } else {
+      saveDefaultSetting({ name: '右邊欄', setting: { title: '顯示' } })
       rightCol.fadeIn()
       contentArea.css('cssText', '')
       contentCol.css('cssText', '')
@@ -276,6 +299,33 @@
     } else {
       searchBarCloneContainer[0].style.display = 'none'
       fbSearchIsHidden = true
+    }
+  }
+  function runKeyCommandAndCtrl() {
+    isCtrlOrCommandDown = true
+  }
+  function runKeyEnter() {
+    searchBarCloneContainer[0].style.display = 'none'
+    fbSearchIsHidden = true
+  }
+  function runKeyEsc() {
+    if (!fbSearchIsHidden) {
+      searchBarCloneContainer[0].style.display = 'none'
+    }
+  }
+
+
+  // save function
+
+  function saveDefaultSetting(options) {
+    const settingDefaultCheck = window.confirm(`要儲存預設設定${options.name}為${options.setting.title}嗎?`)
+    switch(options.name) {
+      case '右邊欄':
+        window.localStorage.setItem('facebook-refined-rightCol', settingDefaultCheck)
+      break
+      case '左邊欄':
+        window.localStorage.setItem('facebook-refined-leftCol', settingDefaultCheck)
+      break
     }
   }
 }($))
